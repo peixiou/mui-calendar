@@ -1,0 +1,33 @@
+.calendar-container {
+    padding: 30px;
+    .date-inputs{
+        display: flex;
+        width: 400px;
+        gap: 10px;
+        
+    }
+    .calendar-header{
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        .calendar-header-cell{
+            border: 1px solid #ccc;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+    }
+    .calendar-body{
+        
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        .calendar-cell{
+            height: 100px;
+            border: 1px solid #ccc;
+        }
+        .disabled{
+            background-color: #f1eded;
+        }
+    }
+    
+}
