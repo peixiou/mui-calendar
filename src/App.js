@@ -70,7 +70,7 @@ export default function App() {
     setIsModalOpen(true);
 
     setStartDate(new Date(year, month, currentDay+1));
-    setEndDate(new Date(year, month, currentDay))
+    setEndDate(new Date(year, month, currentDay+1))
   }
 
 
@@ -158,7 +158,6 @@ export default function App() {
 
 
 
-          
 
           taskPositions.set(task.id,postion)
         }
