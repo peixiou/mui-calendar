@@ -69,8 +69,8 @@ export default function App() {
   const handleOpenModal = (currentDay) => {
     setIsModalOpen(true);
 
-    setStartDate(new Date(year, month, currentDay+1));
-    setEndDate(new Date(year, month, currentDay+1))
+    setStartDate(new Date(year, month, currentDay + 1));
+    setEndDate(new Date(year, month, currentDay + 1))
   }
 
 
@@ -106,9 +106,9 @@ export default function App() {
 
         const taskStartDate = new Date(task.startDate)
         const taskEndDate = new Date(task.endDate)
-        for (let date= taskStartDate; date <= taskEndDate; date.setDate(date.getDate() + 1)) {
+        for (let date = taskStartDate; date <= taskEndDate; date.setDate(date.getDate() + 1)) {
           // console.log('task', task.content)
-          const dateKey=date.toISOString().split('T')[0];
+          const dateKey = date.toISOString().split('T')[0];
           if (!tasksByDate.has(dateKey)) {
             tasksByDate.set(dateKey, [])
           }
@@ -121,9 +121,9 @@ export default function App() {
     groupTasksByDate()
     console.log('tasksByDate', tasksByDate)
 
-// 算任务的位置
+    // 算任务的位置
 
-
+    // 存位置的
     const taskPositions = new Map();
     const getTaskPosition = (task) => {
       tasks.forEach(task => {
@@ -131,24 +131,27 @@ export default function App() {
         const taskStartDate = new Date(task.startDate)
         const taskEndDate = new Date(task.endDate)
         // 既可能是单任务，也可能是多天任务
-        for (let date= taskStartDate; date <= taskEndDate; date.setDate(date.getDate() + 1)) {
-          const dateKey=date.toISOString().split('T')[0];
-          const tasksInDay=tasksByDate.get(dateKey)
+        for (let date = taskStartDate; date <= taskEndDate; date.setDate(date.getDate() + 1)) {
+          const dateKey = date.toISOString().split('T')[0];
+          const tasksInDay = tasksByDate.get(dateKey)
 
 
 
+          // 
+          // 记录已经使用的位置
+          const usedPositions = new Set()
 
-
-          const usedPositions=new Set()
+          // 遍历当天的所有任务，在存放位置的数据中，把已经使用的位置记录下来
           tasksInDay.forEach(taskItem => {
-             if( taskPositions.has(taskItem.id)){
-               usedPositions.add(taskPositions.get(taskItem.id))//0 1 4 5
-             }
+            if (taskPositions.has(taskItem.id)) {
+              // 记录已经使用的位置
+              usedPositions.add(taskPositions.get(taskItem.id))//0 1 4 5
+            }
           })
-          let postion=0
+          let postion = 0
 
           // 找到空位
-          while(usedPositions.has(postion)){
+          while (usedPositions.has(postion)) {
             postion++
           }
 
@@ -158,8 +161,8 @@ export default function App() {
 
 
 
-
-          taskPositions.set(task.id,postion)
+          // 存任务的位置
+          taskPositions.set(task.id, postion)
         }
       })
     }
@@ -177,7 +180,7 @@ export default function App() {
 
         const day = daysOfMonth[i - firstDayInWeek]
         // 
-        const tasksInDay = getTasksByDate(new Date(year, month, day+1))
+        const tasksInDay = getTasksByDate(new Date(year, month, day + 1))
 
 
         arr.push(
@@ -202,7 +205,7 @@ export default function App() {
                   const taskSart = parseDate(new Date(task.startDate))
 
                   const taskEnd = parseDate(new Date(task.endDate))
-                  const currentDate = parseDate(new Date(year, month, day+1))
+                  const currentDate = parseDate(new Date(year, month, day + 1))
                   // console.log('任务', task.content)
                   // console.log(taskSart, taskEnd, currentDate)
                   if (taskSart === currentDate) {
@@ -227,9 +230,9 @@ export default function App() {
                         right: 0,
                         height: '22px',
                         backgroundColor: `var(--task-color-${task.id % 5})`
-                      
+
                       }}
-                      title={new Date(currentDate).toISOString().split('T')[0]+'：'+new Date(taskSart).toISOString().split('T')[0]+'/'+new Date(taskEnd).toISOString().split('T')[0]}
+                      title={new Date(currentDate).toISOString().split('T')[0] + '：' + new Date(taskSart).toISOString().split('T')[0] + '/' + new Date(taskEnd).toISOString().split('T')[0]}
                     >
                       {taskSart === currentDate && task.content}
                     </div>
