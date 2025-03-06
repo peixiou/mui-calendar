@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import Select from "./components/Select";
 import "./App.css";
-import { render } from "@testing-library/react";
 
 const getDaysInMouth = (year, month) => {
   const days = [];
@@ -41,35 +40,208 @@ export default function App() {
 
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [newTaskContent, setNewTaskContent] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [tasks, setTasks] = useState([]);
+
+
+
+
+  useEffect(() => {
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
+    // console.log('本地加载tasks:', tasks);
+
+    setTasks(tasks)
+  }, [])
+
 
   const handleYearChange = (year) => {
     setYear(year.value);
   }
 
   const handleMonthChange = (month) => {
-
     setMonth(month.value);
   }
 
+  const handleOpenModal = (currentDay) => {
+    setIsModalOpen(true);
 
+    setStartDate(new Date(year, month, currentDay+1));
+    setEndDate(new Date(year, month, currentDay))
+  }
+
+
+  const parseDate = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+  }
+
+  const getTasksByDate = (date) => {
+
+    return tasks.filter(task => {
+      return parseDate(date) >= parseDate(new Date(task.startDate)) && parseDate(date) <= parseDate(new Date(task.endDate))
+    })
+  }
 
 
   const renderCalendar = () => {
-    const daysOfMonth= getDaysInMouth(year, month);
+    const daysOfMonth = getDaysInMouth(year, month);
     // 1 2 3 .....31
-    const firstDayInWeek= ZellerWeekDay(year, month, 1);
-    const preMouthDays=getDaysInMouth(year,month-1);
-    const preMouthLastDays=preMouthDays.slice(-firstDayInWeek)
-// 下个月的开头几天
-    const nextMouthDays=getDaysInMouth(year,month+1);
-    const arr=[]
-    for (let i=0;i<42;i++){
-      if(i<firstDayInWeek){
+    const firstDayInWeek = ZellerWeekDay(year, month, 1);
+    const preMouthDays = getDaysInMouth(year, month - 1);
+    const preMouthLastDays = preMouthDays.slice(-firstDayInWeek)
+    // 下个月的开头几天
+    const nextMouthDays = getDaysInMouth(year, month + 1);
+    const arr = []
+
+    const tasksByDate = new Map();
+
+    //  key1:[task1,task2]
+    // key2:[task3,task4]
+
+    const groupTasksByDate = () => {
+      tasks.forEach(task => {
+
+        const taskStartDate = new Date(task.startDate)
+        const taskEndDate = new Date(task.endDate)
+        for (let date= taskStartDate; date <= taskEndDate; date.setDate(date.getDate() + 1)) {
+          // console.log('task', task.content)
+          const dateKey=date.toISOString().split('T')[0];
+          if (!tasksByDate.has(dateKey)) {
+            tasksByDate.set(dateKey, [])
+          }
+          tasksByDate.get(dateKey).push(task)
+        }
+      })
+    }
+
+
+    groupTasksByDate()
+    console.log('tasksByDate', tasksByDate)
+
+// 算任务的位置
+
+
+    const taskPositions = new Map();
+    const getTaskPosition = (task) => {
+      tasks.forEach(task => {
+
+        const taskStartDate = new Date(task.startDate)
+        const taskEndDate = new Date(task.endDate)
+        // 既可能是单任务，也可能是多天任务
+        for (let date= taskStartDate; date <= taskEndDate; date.setDate(date.getDate() + 1)) {
+          const dateKey=date.toISOString().split('T')[0];
+          const tasksInDay=tasksByDate.get(dateKey)
+
+
+
+
+
+          const usedPositions=new Set()
+          tasksInDay.forEach(taskItem => {
+             if( taskPositions.has(taskItem.id)){
+               usedPositions.add(taskPositions.get(taskItem.id))//0 1 4 5
+             }
+          })
+          let postion=0
+
+          // 找到空位
+          while(usedPositions.has(postion)){
+            postion++
+          }
+
+
+
+
+
+
+
+          
+
+          taskPositions.set(task.id,postion)
+        }
+      })
+    }
+
+
+    getTaskPosition()
+
+
+
+    // 遍历日期
+    for (let i = 0; i < 42; i++) {
+      if (i < firstDayInWeek) {
         arr.push(<div className="calendar-cell disabled">{preMouthLastDays[i]}</div>)
-      }else if(i>=firstDayInWeek&&i<(firstDayInWeek+daysOfMonth.length)){
-        arr.push(<div className="calendar-cell">{daysOfMonth[i-firstDayInWeek]}</div>)
-      }else{
-        arr.push(<div className="calendar-cell disabled">{nextMouthDays[i-(firstDayInWeek+daysOfMonth.length)]}</div>)
+      } else if (i >= firstDayInWeek && i < (firstDayInWeek + daysOfMonth.length)) {
+
+        const day = daysOfMonth[i - firstDayInWeek]
+        // 
+        const tasksInDay = getTasksByDate(new Date(year, month, day+1))
+
+
+        arr.push(
+          <div className="calendar-cell">
+            <div className="date-header">
+              <span>{day}</span>
+
+              <div
+                className="add-task-btn material-btn"
+
+              >
+                <span className="material-icon" onClick={() => { handleOpenModal(day) }}></span>
+              </div>
+            </div>
+            <div className="tasks-container">
+              {
+                tasksInDay.map((task, i) => {
+
+                  let taskClass = `task-item`
+
+
+                  const taskSart = parseDate(new Date(task.startDate))
+
+                  const taskEnd = parseDate(new Date(task.endDate))
+                  const currentDate = parseDate(new Date(year, month, day+1))
+                  // console.log('任务', task.content)
+                  // console.log(taskSart, taskEnd, currentDate)
+                  if (taskSart === currentDate) {
+                    taskClass += ' task-start'
+                  }
+                  if (currentDate > taskSart && currentDate < taskEnd) {
+                    taskClass += ' task-middle'
+                  }
+
+                  if (taskEnd === currentDate) {
+                    taskClass += ' task-end'
+                  }
+
+                  return (
+                    <div
+
+                      className={taskClass}
+                      style={{
+                        position: 'absolute',
+                        marginTop: `${taskPositions.get(task.id) * 24}px`,
+                        left: 0,
+                        right: 0,
+                        height: '22px',
+                        backgroundColor: `var(--task-color-${task.id % 5})`
+                      
+                      }}
+                      title={new Date(currentDate).toISOString().split('T')[0]+'：'+new Date(taskSart).toISOString().split('T')[0]+'/'+new Date(taskEnd).toISOString().split('T')[0]}
+                    >
+                      {taskSart === currentDate && task.content}
+                    </div>
+                  )
+                })
+              }
+            </div>
+          </div>
+        )
+      } else {
+        arr.push(<div className="calendar-cell disabled">{nextMouthDays[i - (firstDayInWeek + daysOfMonth.length)]}</div>)
       }
     }
 
@@ -84,12 +256,40 @@ export default function App() {
   //   renderCalendar();
   // }, [year, month])
 
-  console.log(year, month);
-  
+  // console.log(year, month);
+
+
+
+
+  const handleSubmit = () => {
+    if (newTaskContent.trim()) {
+      const newTask = {
+        id: Date.now().toString(),
+        content: newTaskContent,
+        startDate: startDate,
+        endDate: endDate
+      }
+      // 同步
+      const newTasks = [...tasks, newTask]
+      // 异步
+      setTasks(newTasks)
+      // 存起来
+      localStorage.setItem('tasks', JSON.stringify(newTasks))
+      // 取
+      setNewTaskContent('')
+      setIsModalOpen(false)
+    }
+  }
+
+
+  const handleEndDateChange = (e) => {
+    setEndDate(new Date(e.target.value))
+  }
+
 
   return (
     <div className="calendar-container">
-      <div className="date-inputs">
+      <div className="select-date">
         <Select
           defaultValue={{ name: year, value: year }}
           onChange={handleYearChange}
@@ -110,9 +310,45 @@ export default function App() {
           }
         </div>
         <div class="calendar-body">
-         {renderCalendar()}
+          {renderCalendar()}
         </div>
       </div>
+
+
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>添加任务</h3>
+            <input
+              type="text"
+              onChange={(e) => setNewTaskContent(e.target.value)}
+              placeholder="输入任务内容"
+            />
+            <div className="date-inputs">
+              <div>
+                <label>开始日期：</label>
+                <input
+                  type="date"
+                  value={startDate.toISOString().split('T')[0]}//yyyy-mm-dd
+                  onChange={(e) => setStartDate(new Date(e.target.value))}
+                />
+              </div>
+              <div>
+                <label>结束日期：</label>
+                <input
+                  type="date"
+                  value={endDate.toISOString().split('T')[0]}//yyyy-mm-dd
+                  onChange={handleEndDateChange}
+                />
+              </div>
+            </div>
+            <div className="modal-actions">
+              <button onClick={handleSubmit}>确定</button>
+              <button onClick={() => setIsModalOpen(false)}>取消</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

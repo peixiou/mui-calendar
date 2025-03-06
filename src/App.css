@@ -1,33 +1,232 @@
-.calendar-container {
-    padding: 30px;
-    .date-inputs{
+:root {
+    --task-color-0: #4CAF50;
+    --task-color-1: #2196F3;
+    --task-color-2: #FF9800;
+    --task-color-3: #9C27B0;
+    --task-color-4: #E91E63;
+  }
+  .calendar-container {
+    padding-top: 20px;
+  
+    .select-date {
         display: flex;
-        width: 400px;
-        gap: 10px;
+        justify-content: end;
+        padding-right: 200px;
+        margin-bottom: 20px;
         
+        & > div {
+            width: 150px;
+            margin-right: 20px;
+        }
     }
-    .calendar-header{
-        margin-top: 20px;
+  
+    .calendar {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+  
+    .calendar-header {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        .calendar-header-cell{
-            border: 1px solid #ccc;
-            height: 40px;
+    }
+  
+    .calendar-body {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0;
+    }
+  
+    .weekday {
+        font-weight: bold;
+        background-color: #f5f5f5;
+        border: none;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+  
+    .calendar-cell {
+        position: relative;
+        min-height: 120px;
+        border: 1px solid #e0e0e0;
+        padding: 4px;
+        background-color: white;
+    }
+  
+    .tasks-container {
+        margin-top: 24px;
+    }
+  
+    .task-item {
+        background-color: #4CAF50;
+        color: white;
+        padding: 2px 4px;
+        font-size: 12px;
+        height: 18px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        box-sizing: border-box;
+        margin-bottom: 0px;
+    }
+  
+    .task-start {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+        margin-right: -1px;
+        width: calc(100% + 1px);
+    }
+  
+    .task-middle {
+        border-radius: 0;
+        margin-left: -1px;
+        margin-right: -1px;
+        width: calc(100% + 2px);
+    }
+  
+    .task-end {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        margin-left: -1px;
+        width: 100%;
+    }
+  
+    .date-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+  
+    .add-task-btn {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        transition: background-color 0.2s;
+    }
+  
+    .add-task-btn:hover {
+        background-color: #e0e0e0;
+    }
+  
+    .material-icon::before {
+        content: "+";
+        font-size: 16px;
+        color: #666;
+    }
+  
+    .date-header span {
+        font-size: 14px;
+        color: #333;
+    }
+  
+    .task-item:nth-of-type(2n) {
+        background-color: #2196F3;
+    }
+  
+    .task-item:nth-of-type(3n) {
+        background-color: #FF9800;
+    }
+  
+    .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+  
+        .modal-content {
+            background: white;
+            padding: 20px 24px;
+            border-radius: 8px;
+            width: 400px;
+  
+            input {
+                width: 100%;
+                padding: 8px 12px;
+                margin: 10px 0;
+                box-sizing: border-box;
+            }
+        }
+  
+        .modal-actions {
             display: flex;
-            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 20px;
+  
+            button {
+                padding: 6px 16px;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+  
+                &:first-child {
+                    background: #1890ff;
+                    color: white;
+                }
+  
+                &:last-child {
+                    background: #f0f0f0;
+                }
+            }
         }
     }
-    .calendar-body{
-        
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        .calendar-cell{
-            height: 100px;
-            border: 1px solid #ccc;
-        }
-        .disabled{
-            background-color: #f1eded;
-        }
-    }
-    
-}
+  }
+  
+  .material-icon {
+    font-size: 16px;
+    line-height: 1;
+    user-select: none;
+  }
+  
+  .calendar-cell.disabled {
+  opacity: 0.5;
+  background-color: #f5f5f5;
+  cursor: default;
+  }
+  
+  .calendar-cell.disabled .date-header {
+  color: #999;
+  }
+  
+  .calendar-cell.disabled .add-task-btn {
+  display: none;
+  }
+  
+  .date-inputs {
+  margin: 15px 0;
+  }
+  
+  .date-inputs > div {
+  margin: 10px 0;
+  }
+  
+  .date-inputs label {
+  display: inline-block;
+  width: 80px;
+  margin-right: 10px;
+  }
+  
+  .date-inputs input[type="date"] {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  }
+  
+  .tasks-container {
+  overflow: hidden;
+  }
+  
+  
